@@ -1,7 +1,8 @@
 const { Router, json } = require("express");
 const userModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
+const isAuth = require("../middlewares/isAuth.middleware");
 
 const authRouter = Router();
 
@@ -20,21 +21,32 @@ authRouter.post("/sign-up", async (req, res) => {
   res.status(201).json({ message: "user created succsesfully" });
 });
 
-authRouter.post('/sign-in', async(req,res)=>{
-    const {email,password}= req.body
-    if(!email || !password) return res.status(400).json({error:'field are required'})
-    const existUser = await userModel.findOne({email: email.toLowerCase()}).select('password')
-    if(!existUser) return res.status(400).json({error:"email or passwrod  is incorrect"})
-    
-    const isPassed = await bcrypt.compare(password , existUser.password)
-    if(!isPassed) return res.status(400).json({error:'email or passwrod  is incorrect'})
+authRouter.post("/sign-in", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password)
+    return res.status(400).json({ error: "field are required" });
+  const existUser = await userModel
+    .findOne({ email: email.toLowerCase() })
+    .select("password");
+  if (!existUser)
+    return res.status(400).json({ error: "email or passwrod  is incorrect" });
 
-        const payload = {
-            userId: existUser._id
-        }
-        const accsesToken = jwt.sign(payload, process.env.JWT_SECRET , {expiresIn:'1h'})
-        res.json(accsesToken)
+  const isPassed = await bcrypt.compare(password, existUser.password);
+  if (!isPassed)
+    return res.status(400).json({ error: "email or passwrod  is incorrect" });
+
+  const payload = {
+    userId: existUser._id,
+  };
+  const accsesToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "3h",
+  });
+  res.json(accsesToken);
+});
+
+authRouter.get('/current-user', isAuth, async(req,res)=>{
+  const user = await userModel.findById(req.userId)
+  res.json(user)
 })
-
 
 module.exports = authRouter;
