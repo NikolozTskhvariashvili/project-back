@@ -4,8 +4,10 @@ const usersRouter = require("./users/user.router");
 const linksRouter = require("./links/link.router");
 const authRouter = require("./auth/auth.router");
 const isAuth = require("./middlewares/isAuth.middleware");
+const cors =require('cors')
 const app = express();
 app.use(express.json());
+app.use(cors())
 
 connectToDB();
 
