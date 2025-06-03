@@ -41,7 +41,7 @@ authRouter.post("/sign-in", async (req, res) => {
   const accsesToken = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "3h",
   });
-  res.json(accsesToken);
+  res.json({accsesToken});
 });
 
 authRouter.get('/current-user', isAuth, async(req,res)=>{
